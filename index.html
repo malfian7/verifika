@@ -1,0 +1,1393 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Verifika — OCR & Document Validation</title>
+<meta name="description" content="Prototipe aplikasi OCR & validasi dokumen: KTP, STNK, BPKB, paspor, rekening koran, dan lainnya dengan analisis risiko berbasis AI.">
+<meta name="theme-color" content="#3538CD">
+
+<!-- Favicon (path relatif agar tetap jalan di https://<user>.github.io/<repo>/) -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/icons/favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/icons/favicon-16x16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+
+<!-- Open Graph (pratinjau saat link dibagikan) -->
+<meta property="og:title" content="Verifika — OCR & Document Validation">
+<meta property="og:description" content="Prototipe aplikasi OCR & validasi dokumen: KTP, STNK, BPKB, paspor, rekening koran, dan lainnya dengan analisis risiko berbasis AI.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/icons/icon-512.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<!-- ======================= AUTH LAYER ======================= -->
+<div id="authLayer" class="auth">
+  <aside class="auth-brand">
+    <div class="wordmark">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><circle cx="8.5" cy="11" r="2.2"/><path d="M5 17c.7-1.7 2-2.5 3.5-2.5S11.3 15.3 12 17M15 9.5h4M15 13h4"/></svg></span>
+      <span>
+        <span class="wm-name">Verifika</span>
+        <span class="wm-sub">OCR &amp; Document Validation</span>
+      </span>
+    </div>
+
+    <div class="auth-pitch">
+      <h1>Baca dokumen apa pun. Validasi dalam hitungan detik.</h1>
+      <p>Mesin OCR + AI untuk e-KTP, STNK, BPKB, sertifikat tanah, paspor, rekening koran, sampai akta pendirian — lengkap dengan deteksi pemalsuan dan skor risiko.</p>
+      <ul class="auth-caps">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>11 mode dokumen dengan skema field masing-masing</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Deteksi tampering, layar-tangkap, dan foto tempel</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Webhook &amp; REST API siap masuk ke core system</span></li>
+      </ul>
+    </div>
+
+    <div class="auth-stats">
+      <div class="auth-stat"><b>98,7%</b><span>Akurasi field rata-rata</span></div>
+      <div class="auth-stat"><b>1,8s</b><span>Median waktu ekstraksi</span></div>
+      <div class="auth-stat"><b>ISO 27001</b><span>Selaras UU PDP No.27/2022</span></div>
+    </div>
+  </aside>
+
+  <main class="auth-panel">
+    <!-- ---------- LOGIN ---------- -->
+    <div class="auth-card" id="cardLogin">
+      <h2>Masuk ke ruang kerja</h2>
+      <p class="sub">Gunakan akun perusahaan Anda. Sesi berakhir otomatis setelah 30 menit tidak aktif.</p>
+
+      <div id="loginError" hidden></div>
+
+      <form class="auth-form" id="loginForm" novalidate>
+        <div class="field">
+          <label class="label" for="email">Email kerja</label>
+          <input class="input" id="email" name="email" type="email" inputmode="email" autocomplete="username"
+                 placeholder="nama@perusahaan.co.id" aria-describedby="emailErr" required>
+          <p class="err" id="emailErr" hidden></p>
+        </div>
+
+        <div class="field">
+          <div class="row-between">
+            <label class="label" for="password">Kata sandi</label>
+            <button type="button" class="label" style="color:var(--brand)" data-go="forgot">Lupa kata sandi?</button>
+          </div>
+          <div class="input-wrap">
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password"
+                   placeholder="Minimal 10 karakter" aria-describedby="passErr" required>
+            <button type="button" class="in-btn" id="togglePass" aria-label="Tampilkan kata sandi" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="err" id="passErr" hidden></p>
+        </div>
+
+        <div class="field">
+          <label class="label" for="captcha">Kode verifikasi</label>
+          <div class="cap-box">
+            <div class="cap-img" id="capImg" role="img" aria-label="Kode verifikasi bergambar, gunakan tombol dengar jika sulit dibaca"></div>
+            <div class="cap-tools">
+              <button type="button" id="capRefresh" aria-label="Ganti kode verifikasi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg>
+              </button>
+              <button type="button" id="capAudio" aria-label="Dengarkan kode verifikasi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg>
+              </button>
+            </div>
+            <input class="input" id="captcha" name="captcha" inputmode="text" autocomplete="off" spellcheck="false"
+                   maxlength="6" placeholder="Ketik kodenya" aria-describedby="capErr capHint">
+          </div>
+          <p class="hint" id="capHint">Sulit dibaca? Ganti kode atau dengarkan lewat audio. Tempel (paste) diizinkan.</p>
+          <p class="err" id="capErr" hidden></p>
+        </div>
+
+        <div class="row-between">
+          <label class="check" for="remember"><input type="checkbox" id="remember" checked> Ingat perangkat ini 14 hari</label>
+          <span class="pill pill-mute">SSO tersedia</span>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" type="submit" id="loginSubmit">Masuk</button>
+
+        <div class="divider-or">atau</div>
+        <button class="btn btn-ghost btn-lg btn-block" type="button" id="ssoBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Lanjutkan dengan SSO perusahaan
+        </button>
+      </form>
+
+      <p class="auth-foot">Akses dibatasi untuk karyawan terdaftar. Butuh akun?<br><a href="#" data-noop>Hubungi administrator IT</a> · <a href="#" data-noop>Kebijakan privasi</a></p>
+    </div>
+
+    <!-- ---------- FORGOT: REQUEST ---------- -->
+    <div class="auth-card" id="cardForgot" hidden>
+      <button class="back-link" data-go="login">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Kembali ke halaman masuk
+      </button>
+      <h2>Atur ulang kata sandi</h2>
+      <p class="sub">Masukkan email kerja Anda. Kami kirim kode 6 angka yang berlaku 10 menit.</p>
+
+      <form class="auth-form" id="forgotForm" novalidate>
+        <div class="field">
+          <label class="label" for="fEmail">Email kerja</label>
+          <input class="input" id="fEmail" type="email" inputmode="email" autocomplete="username"
+                 placeholder="nama@perusahaan.co.id" aria-describedby="fEmailErr" required>
+          <p class="err" id="fEmailErr" hidden></p>
+        </div>
+        <div class="alert alert-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>Untuk akun yang terhubung SSO, atur ulang kata sandi dilakukan di penyedia identitas perusahaan.</span>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Kirim kode verifikasi</button>
+      </form>
+    </div>
+
+    <!-- ---------- FORGOT: OTP ---------- -->
+    <div class="auth-card" id="cardOtp" hidden>
+      <button class="back-link" data-go="forgot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Ganti email
+      </button>
+      <h2>Masukkan kode 6 angka</h2>
+      <p class="sub">Kode dikirim ke <b id="otpTarget" class="mono">nama@perusahaan.co.id</b>.</p>
+
+      <form class="auth-form" id="otpForm" novalidate>
+        <div class="field">
+          <label class="label" for="otp1">Kode verifikasi</label>
+          <div class="otp-row" id="otpRow">
+            <input id="otp1" inputmode="numeric" maxlength="1" aria-label="Angka 1"><input inputmode="numeric" maxlength="1" aria-label="Angka 2"><input inputmode="numeric" maxlength="1" aria-label="Angka 3"><input inputmode="numeric" maxlength="1" aria-label="Angka 4"><input inputmode="numeric" maxlength="1" aria-label="Angka 5"><input inputmode="numeric" maxlength="1" aria-label="Angka 6">
+          </div>
+          <p class="hint">Berlaku <span class="mono" id="otpTimer">09:57</span>. Belum masuk? <button type="button" style="color:var(--brand);font-weight:600" id="otpResend">Kirim ulang</button></p>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Verifikasi dan lanjutkan</button>
+      </form>
+    </div>
+  </main>
+</div>
+<!-- ======================= APP LAYER ======================= -->
+<div id="appLayer" class="app" hidden>
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><circle cx="8.5" cy="11" r="2.2"/><path d="M5 17c.7-1.7 2-2.5 3.5-2.5S11.3 15.3 12 17M15 9.5h4M15 13h4"/></svg></span>
+      <span>
+        <span class="wm-name">Verifika</span>
+        <span class="wm-sub">OCR &amp; Validation</span>
+      </span>
+    </div>
+
+    <p class="eyebrow nav-group">Ruang kerja</p>
+    <button class="nav-item" data-view="dashboard" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="8" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="5" rx="1.6"/><rect x="3" y="14" width="7.5" height="7" rx="1.6"/><rect x="13.5" y="11" width="7.5" height="10" rx="1.6"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-item" data-view="modes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18.5" cy="17" r="2.5"/></svg>
+      <span>Mode dokumen</span>
+      <span class="nav-count">11</span>
+    </button>
+    <button class="nav-item" data-view="scan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5.5A2.5 2.5 0 0 1 5.5 3H8M16 3h2.5A2.5 2.5 0 0 1 21 5.5V8M21 16v2.5A2.5 2.5 0 0 1 18.5 21H16M8 21H5.5A2.5 2.5 0 0 1 3 18.5V16M7 12h10"/></svg>
+      <span>Pindai dokumen</span>
+    </button>
+    <button class="nav-item" data-view="batch">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8.5 3.5 10 5l1.5-1.5"/></svg>
+      <span>Unggah massal</span>
+      <span class="nav-count">42</span>
+    </button>
+    <button class="nav-item" data-view="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>
+      <span>Riwayat validasi</span>
+    </button>
+
+    <p class="eyebrow nav-group">Pengaturan</p>
+    <button class="nav-item" data-view="rules">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      <span>Aturan validasi</span>
+    </button>
+    <button class="nav-item" data-view="api">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 16-4-4 4-4M16 8l4 4-4 4M13.5 5l-3 14"/></svg>
+      <span>Integrasi &amp; API</span>
+    </button>
+
+    <div class="rail-foot">
+      <div class="usage">
+        <div class="row-between"><span class="eyebrow">Kuota bulan ini</span><span class="mono" style="font-size:11px;color:var(--muted)">68%</span></div>
+        <div class="usage-bar"><i style="width:68%"></i></div>
+        <p style="font-size:11.5px;color:var(--muted)"><b class="mono" style="color:var(--ink)">13.640</b> dari 20.000 halaman</p>
+      </div>
+      <button class="nav-item" style="margin-top:6px" data-logout>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M12 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"/></svg>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-ctx">
+        <span class="eyebrow" id="ctxEyebrow" hidden></span>
+        <h2 id="ctxTitle">Dashboard</h2>
+      </div>
+      <div class="topbar-tools">
+        <div class="pop-wrap">
+          <button class="icon-btn" id="notifBtn" aria-label="Notifikasi" aria-expanded="false" aria-haspopup="true" style="position:relative">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7M10.5 19.5a2 2 0 0 0 3 0"/></svg>
+            <span class="badge" id="notifBadge">3</span>
+          </button>
+          <div class="pop" id="notifPop" hidden role="dialog" aria-label="Daftar notifikasi">
+            <div class="pop-head">
+              <h3>Notifikasi</h3>
+              <button type="button" id="notifReadAll">Tandai semua dibaca</button>
+            </div>
+            <div class="pop-list" id="notifList"></div>
+            <div class="pop-foot"><button type="button" id="notifAll">Lihat semua notifikasi</button></div>
+          </div>
+        </div>
+
+        <div class="pop-wrap">
+          <button class="avatar" id="profileBtn" aria-expanded="false" aria-haspopup="true">
+            <i aria-hidden="true">MA</i>
+            <span>M. Alfian<small>Analis Verifikasi · PKP</small></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="pop" id="profilePop" hidden style="width:262px" role="menu" aria-label="Menu akun">
+            <div class="pop-user">
+              <i aria-hidden="true">MA</i>
+              <span style="min-width:0">
+                <b>Muhammad Alfian</b>
+                <small>muhammad.alfian@pkp.co.id</small>
+              </span>
+            </div>
+            <div class="pop-menu">
+              <button class="pop-mi" role="menuitem" id="miProfile">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c0-3.6 3.3-5.8 7.5-5.8s7.5 2.2 7.5 5.8"/></svg>
+                <span>Profile</span>
+              </button>
+              <div class="pop-sep"></div>
+              <button class="pop-mi danger" role="menuitem" data-logout>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M12 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"/></svg>
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="route-bar" id="routeBar" aria-hidden="true"><i></i></div>
+    <div class="page" id="pageSkel" hidden aria-hidden="true"></div>
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="view page dash" id="view-dashboard">
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Ringkasan 30 hari terakhir. Angka di bawah adalah data contoh untuk memperlihatkan tampilan saat sistem berjalan.</p>
+        </div>
+        <button class="btn btn-primary" data-view="modes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>
+          Pindai dokumen baru
+        </button>
+      </div>
+
+      <div class="grid g-4 dash-kpi">
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Dokumen diproses</span>
+            <span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M19 8v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7Z"/></svg></span>
+          </div>
+          <div class="kpi-val">13.640</div>
+          <div class="kpi-foot"><span class="trend trend-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 7-7 7 7"/></svg>18,2%</span> vs 30 hari sebelumnya</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Akurasi field</span>
+            <span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          </div>
+          <div class="kpi-val">98,7<small>%</small></div>
+          <div class="kpi-foot"><span class="trend trend-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 7-7 7 7"/></svg>0,4 pt</span> setelah model v4.2</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Perlu tinjau manual</span>
+            <span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.6 17.2A1.8 1.8 0 0 0 4.2 20h15.6a1.8 1.8 0 0 0 1.6-2.8L13.7 3.9a1.8 1.8 0 0 0-3.4 0Z"/></svg></span>
+          </div>
+          <div class="kpi-val">312</div>
+          <div class="kpi-foot"><span class="trend trend-down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m19 9-7 7-7-7"/></svg>6,1%</span> 2,3% dari total</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Indikasi pemalsuan</span>
+            <span class="kpi-ico" style="background:var(--bad-soft);color:var(--bad);border-color:var(--bad-line)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.4 8.3-8 9-4.6-.7-8-4-8-9V7l8-4Z"/><path d="m9.5 12 1.8 1.8 3.5-3.5"/></svg></span>
+          </div>
+          <div class="kpi-val">47</div>
+          <div class="kpi-foot"><span class="pill pill-bad">Ditahan</span> 0,34% dari total</div>
+        </div>
+      </div>
+
+      <div class="dash-body">
+        <div class="card dash-chart">
+          <div class="card-head">
+            <div><h3 class="card-title">Volume pemrosesan harian</h3><p class="card-sub">Tervalidasi vs. yang perlu ditinjau, 14 hari terakhir</p></div>
+            <span class="pill pill-brand">14 hari</span>
+          </div>
+          <div class="chart-legend">
+            <span><i style="background:var(--brand)"></i>Tervalidasi</span>
+            <span><i style="background:var(--warn)"></i>Perlu tinjau</span>
+          </div>
+          <div class="chart-wrap"><div id="volChart"></div><div class="chart-tip" id="volTip" role="status"></div></div>
+        </div>
+
+        <div class="card dash-dist">
+          <div class="card-head">
+            <div><h3 class="card-title">Distribusi per jenis dokumen</h3><p class="card-sub">Lima mode teratas bulan ini</p></div>
+          </div>
+          <div class="bar-list" id="modeBars"></div>
+        </div>
+
+        <div class="card dash-act">
+          <div class="card-head">
+            <div><h3 class="card-title">Aktivitas terbaru</h3><p class="card-sub" id="actSub">Empat pemrosesan terakhir di tim Anda</p></div>
+            <button class="btn btn-ghost btn-sm" data-view="history">Lihat semua</button>
+          </div>
+          <div class="act-list" id="actList"></div>
+          <div class="pager">
+            <span class="pager-info" id="actInfo">1–4 dari 10</span>
+            <button class="pager-btn" id="actPrev" aria-label="Aktivitas sebelumnya" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+            </button>
+            <button class="pager-btn" id="actNext" aria-label="Aktivitas berikutnya">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="card dash-ai">
+          <div class="card-head"><div><h3 class="card-title">Kesehatan model AI</h3><p class="card-sub">Pemantauan mingguan per kemampuan</p></div></div>
+          <div class="bar-list">
+            <div class="bar-row"><span class="bl">Deteksi tampering</span><span class="bv">99,1%</span><span class="bar-track"><i style="width:99%;background:var(--ok)"></i></span></div>
+            <div class="bar-row"><span class="bl">Parsing MRZ paspor</span><span class="bv">99,6%</span><span class="bar-track"><i style="width:99.6%;background:var(--ok)"></i></span></div>
+            <div class="bar-row"><span class="bl">Tabel rekening koran</span><span class="bv">96,2%</span><span class="bar-track"><i style="width:96%;background:var(--brand)"></i></span></div>
+            <div class="bar-row"><span class="bl">Tulisan tangan akta</span><span class="bv">88,4%</span><span class="bar-track"><i style="width:88%;background:var(--warn)"></i></span></div>
+          </div>
+          <div class="stat-strip">
+            <div><span class="eyebrow">Model aktif</span><b>v4.2.1</b></div>
+            <div><span class="eyebrow">Latensi p95</span><b>2,4s</b></div>
+            <div><span class="eyebrow">Uptime 30h</span><b>99,98%</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- MODE PICKER ---------- -->
+    <section class="view page" id="view-modes" hidden>
+      <div class="page-head">
+        <div>
+          <h1>Pilih mode dokumen</h1>
+          <p>Setiap mode punya skema field, aturan validasi, dan kemampuan AI sendiri. Pilih satu untuk mulai memindai.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" data-view="batch">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            Unggah massal
+          </button>
+          <button class="btn btn-ai" data-noop>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"/><path d="M18 16l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9L18 16Z"/></svg>
+            Deteksi jenis otomatis
+          </button>
+        </div>
+      </div>
+      <div class="mode-grid" id="modeGrid"></div>
+    </section>
+
+    <!-- ---------- SCAN FLOW ---------- -->
+    <section class="view page" id="view-scan" hidden>
+      <div class="page-head">
+        <div>
+          <span class="eyebrow" id="scanEyebrow">Mode aktif</span>
+          <h1 id="scanTitle">Validasi KTP</h1>
+          <p id="scanDesc">Unggah foto dokumen, periksa hasil baca, lalu validasi datanya.</p>
+        </div>
+        <button class="btn btn-ghost" data-view="modes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Ganti mode
+        </button>
+      </div>
+
+      <div class="stepper" id="stepper">
+        <div class="step now" data-step="1"><span class="step-dot">1</span><span class="step-label">Unggah gambar</span></div>
+        <span class="step-line" data-line="1"></span>
+        <div class="step" data-step="2"><span class="step-dot">2</span><span class="step-label">Pratinjau &amp; proses</span></div>
+        <span class="step-line" data-line="2"></span>
+        <div class="step" data-step="3"><span class="step-dot">3</span><span class="step-label">Hasil ekstraksi</span></div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div id="step1" class="card card-pad">
+        <div style="margin-bottom:14px">
+          <h3 class="card-title" id="uploadTitle">Unggah foto KTP</h3>
+          <p class="card-sub" id="uploadHint">Pastikan seluruh bagian dokumen terlihat jelas dan tidak terpotong.</p>
+        </div>
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="Pilih berkas dokumen untuk diunggah">
+          <span class="drop-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V8m0 0-3 3m3-3 3 3"/><path d="M20 16.5A3.5 3.5 0 0 0 18 10h-.7A6 6 0 1 0 6 14.5"/></svg></span>
+          <h3>Tarik dan lepas berkas di sini</h3>
+          <p>atau pilih berkas dari perangkat Anda</p>
+          <span class="btn btn-primary">Pilih berkas</span>
+          <p class="meta" id="dropMeta">JPG, PNG atau PDF · Maksimal 10 MB per berkas</p>
+        </div>
+        <div class="tipbar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v1M12 20v1M4.9 4.9l.7.7M18.4 18.4l.7.7M3 12h1M20 12h1M4.9 19.1l.7-.7M18.4 5.6l.7-.7"/><circle cx="12" cy="12" r="4"/></svg>
+          <span id="tipText">Gunakan pencahayaan merata, hindari pantulan, dan posisikan dokumen mendatar.</span>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="step2" hidden>
+        <div class="split">
+          <div class="card">
+            <div class="card-head">
+              <div><h3 class="card-title">Pratinjau gambar</h3><p class="card-sub mono" id="fileMeta">ktp_raka_pratama.jpg · 1,8 MB</p></div>
+              <button class="btn btn-ghost btn-sm" data-goto-step="1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 16V8m0 0-3 3m3-3 3 3"/><path d="M4 18v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>
+                Ganti gambar
+              </button>
+            </div>
+            <div class="preview">
+              <div class="preview-frame" id="previewFrame">
+                <div id="docMockHost" style="width:100%;height:100%"></div>
+                <span class="scan-band" aria-hidden="true"></span>
+                <span class="scan-grid" aria-hidden="true"></span>
+                <span class="scan-corner tl" aria-hidden="true"></span>
+                <span class="scan-corner tr" aria-hidden="true"></span>
+                <span class="scan-corner bl" aria-hidden="true"></span>
+                <span class="scan-corner br" aria-hidden="true"></span>
+                <span class="scan-chip" aria-hidden="true"><i></i>Memindai dokumen…</span>
+              </div>
+            </div>
+            <div class="preview-foot">
+              <span><span class="dot-ok"></span>Gambar tajam · Semua sudut terdeteksi</span>
+              <span class="mono">1920 × 1200 px · 300 dpi</span>
+            </div>
+          </div>
+
+          <div class="ai-card" id="aiSetupCard">
+            <div class="ai-head">
+              <span class="ai-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"/></svg></span>
+              <div><h3>Kemampuan AI untuk mode ini</h3><p>Nyalakan yang Anda perlukan sebelum ekstraksi dijalankan.</p></div>
+            </div>
+            <div class="ai-features" id="aiFeatureList"></div>
+            <div class="ai-actions">
+              <button class="btn btn-primary" id="runExtract" style="flex:1 1 160px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 8V5.5A2.5 2.5 0 0 1 5.5 3H8M16 3h2.5A2.5 2.5 0 0 1 21 5.5V8M21 16v2.5A2.5 2.5 0 0 1 18.5 21H16M8 21H5.5A2.5 2.5 0 0 1 3 18.5V16M7 12h10"/></svg>
+                Mulai ekstraksi
+              </button>
+              <button class="btn btn-ghost" data-goto-step="1">Unggah ulang</button>
+            </div>
+          </div>
+
+          <!-- PROCESSING -->
+          <div id="stepProc" class="card" hidden>
+            <div class="proc">
+              <div class="proc-ring">
+                <svg viewBox="0 0 74 74" aria-hidden="true">
+                  <circle cx="37" cy="37" r="31" fill="none" stroke="var(--line)" stroke-width="7"/>
+                  <circle id="procArc" cx="37" cy="37" r="31" fill="none" stroke="var(--brand)" stroke-width="7" stroke-linecap="round" stroke-dasharray="195" stroke-dashoffset="195"/>
+                </svg>
+                <b id="procPct">0%</b>
+              </div>
+              <div>
+                <h3 id="procTitle">Mengekstraksi dokumen…</h3>
+                <p>Gambar diperbaiki dulu, baru dibaca OCR, lalu diperiksa mesin AI. Jangan tutup halaman ini.</p>
+              </div>
+              <ul class="proc-steps" id="procSteps"></ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div id="step3" hidden>
+        <div class="split">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3 class="card-title">Hasil ekstraksi</h3>
+                  <p class="card-sub">Angka di kolom kiri adalah keyakinan OCR per field. Field di bawah 90% ditandai untuk ditinjau.</p>
+                </div>
+                <div style="text-align:right;flex:none">
+                  <div class="conf-head"><span class="conf-big" id="confBig">98,7%</span></div>
+                  <span class="eyebrow">Keyakinan rata-rata</span>
+                </div>
+              </div>
+              <div class="verdict" id="verdict">
+                <span class="verdict-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                <div><b id="verdictTitle">Identitas terverifikasi</b><p id="verdictText">NIK dan nama sesuai format e-KTP Dukcapil. Tidak ada tanda manipulasi gambar.</p></div>
+              </div>
+              <div class="ledger" id="ledger"></div>
+              <div class="ai-actions" style="border-top:1px solid var(--line)">
+                <button class="btn btn-ghost btn-sm" id="editData">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4 16v4Z"/></svg>
+                  Ubah data
+                </button>
+                <button class="btn btn-ghost btn-sm" id="copyData">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>
+                  Salin data
+                </button>
+                <button class="btn btn-ghost btn-sm" id="jsonBtn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></svg>
+                  Lihat JSON
+                </button>
+                <button class="btn btn-primary btn-sm" id="pushBtn" style="margin-left:auto">Kirim ke core system</button>
+              </div>
+            </div>
+
+            <div class="card" id="jsonCard" hidden>
+              <div class="card-head"><div><h3 class="card-title">Payload API</h3><p class="card-sub">Bentuk respons yang dikirim ke endpoint webhook Anda</p></div>
+                <button class="btn btn-ghost btn-sm" id="jsonClose">Tutup</button>
+              </div>
+              <pre class="mono" id="jsonBody" style="margin:0;padding:16px 18px;font-size:11.5px;line-height:1.7;overflow-x:auto;color:var(--ink-2)"></pre>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="ai-card">
+              <div class="ai-head">
+                <span class="ai-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"/></svg></span>
+                <div><h3>Analisis AI</h3><p id="aiSubtitle">Temuan otomatis untuk dokumen ini</p></div>
+              </div>
+              <div class="risk">
+                <div class="gauge">
+                  <svg viewBox="0 0 80 80" aria-hidden="true">
+                    <circle cx="40" cy="40" r="33" fill="none" stroke="var(--line)" stroke-width="9"/>
+                    <circle id="gaugeArc" cx="40" cy="40" r="33" fill="none" stroke="var(--ok)" stroke-width="9" stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="181"/>
+                  </svg>
+                  <span class="gauge-val" id="gaugeVal">12</span>
+                </div>
+                <div class="risk-body">
+                  <b id="riskLabel">Risiko rendah</b>
+                  <p id="riskText">Skor 0–100. Dihitung dari keaslian dokumen, konsistensi antar-field, dan riwayat pengajuan.</p>
+                </div>
+              </div>
+              <div class="findings" id="findings"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><div><h3 class="card-title">Jejak audit</h3><p class="card-sub">Tercatat otomatis untuk kebutuhan kepatuhan</p></div></div>
+              <div class="act-list" id="auditList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PROFILE ---------- -->
+    <section class="view page" id="view-profile" hidden>
+      <div class="page-head">
+        <div>
+          <h1 id="profTitle">Profil Saya</h1>
+          <p id="profSub">Kelola informasi akun dan foto profil Anda</p>
+        </div>
+        <div class="segmented" id="profTabs" role="tablist" aria-label="Bagian profil">
+          <button class="seg" role="tab" data-ptab="profile" aria-pressed="true">Profile</button>
+          <button class="seg" role="tab" data-ptab="security" aria-pressed="false">Security</button>
+          <button class="seg" role="tab" data-ptab="notification" aria-pressed="false">Notification</button>
+        </div>
+      </div>
+
+      <!-- TAB: PROFILE -->
+      <div id="ptab-profile" class="prof-grid">
+        <div class="card">
+          <div class="card-head"><div><h3 class="card-title">Foto Profile</h3></div></div>
+          <div class="av-wrap">
+            <span class="av-big">
+              <i aria-hidden="true">MA</i>
+              <button class="av-cam" id="avCam" aria-label="Ganti foto profil">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5A2 2 0 0 1 5 7.5h1.6l1-1.7h4.8l1 1.7H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7Z"/><circle cx="12" cy="13" r="3.1"/></svg>
+              </button>
+            </span>
+            <button class="btn btn-ghost btn-sm" id="uploadPhoto" style="color:var(--brand);border-color:var(--brand-line);background:var(--brand-soft)">Unggah Foto</button>
+            <p class="meta">Format: JPG, PNG · Maks. 2 MB</p>
+          </div>
+          <div class="info-list">
+            <div class="info-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.2 2.2 4.3-4.6"/></svg>
+              <span><b>Status Login</b><span>Aktif sejak 12 Jan 2026</span></span>
+            </div>
+            <div class="info-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.4 8.3-8 9-4.6-.7-8-4-8-9V7l8-4Z"/></svg>
+              <span><b>Keamanan 2FA</b><span>Sesi dienkripsi</span></span>
+            </div>
+            <div class="info-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>
+              <span><b>Terakhir Login</b><span>Hari ini, 08:32 WIB</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div><h3 class="card-title">Informasi Pribadi</h3></div></div>
+          <form class="form-grid" id="profForm" novalidate>
+            <div class="field">
+              <label class="label" for="pfName">Nama Lengkap <span style="color:var(--bad)">*</span></label>
+              <input class="input" id="pfName" value="Muhammad Alfian" autocomplete="name">
+            </div>
+            <div class="field">
+              <label class="label" for="pfEmail">Email <span style="color:var(--bad)">*</span></label>
+              <div class="input-wrap">
+                <input class="input" id="pfEmail" type="email" value="muhammad.alfian@pkp.co.id" autocomplete="email">
+                <span class="in-btn" aria-hidden="true" style="color:var(--ok);pointer-events:none">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg>
+                </span>
+              </div>
+              <span class="ok-note">Email terverifikasi</span>
+            </div>
+            <div class="field span2">
+              <label class="label" for="pfPhone">Nomor Telepon <span style="color:var(--bad)">*</span></label>
+              <input class="input" id="pfPhone" type="tel" value="+62 812-3456-7890" autocomplete="tel">
+            </div>
+            <div class="field span2">
+              <label class="label" for="pfAddr">Alamat</label>
+              <textarea class="input" id="pfAddr" placeholder="Masukkan alamat lengkap"></textarea>
+            </div>
+          </form>
+          <div class="card-foot">
+            <button class="btn btn-primary" id="saveProfile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 4h11l3 3v13H5V4Z"/><path d="M9 4v5h6M8.5 14.5h7"/></svg>
+              Simpan Perubahan
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: SECURITY -->
+      <div id="ptab-security" class="prof-grid wide" hidden>
+        <div class="card">
+          <div class="card-head">
+            <div><h3 class="card-title">Riwayat Login</h3><p class="card-sub">Empat sesi terakhir pada akun ini</p></div>
+            <span class="kpi-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg></span>
+          </div>
+          <div class="table-scroll">
+            <table style="min-width:440px">
+              <thead><tr><th>Tanggal</th><th>Perangkat</th><th>Lokasi</th><th style="text-align:right">Status</th></tr></thead>
+              <tbody>
+                <tr><td class="mono" style="font-size:12px">Hari ini, 08:32</td><td>Chrome / MacOS</td><td>Jakarta, ID</td><td><span class="status-cell"><span class="pill pill-ok">Aktif</span></span></td></tr>
+                <tr><td class="mono" style="font-size:12px">Kemarin, 17:14</td><td>Firefox / Windows</td><td>Bandung, ID</td><td><span class="status-cell"><span class="pill pill-mute">Selesai</span></span></td></tr>
+                <tr><td class="mono" style="font-size:12px">14 Sep, 10:02</td><td>Safari / iPhone</td><td>Jakarta, ID</td><td><span class="status-cell"><span class="pill pill-mute">Selesai</span></span></td></tr>
+                <tr><td class="mono" style="font-size:12px">12 Sep, 18:25</td><td>Chrome / MacOS</td><td>Surabaya, ID</td><td><span class="status-cell"><span class="pill pill-bad">Gagal</span></span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div><h3 class="card-title">Ubah Password</h3><p class="card-sub">Kata sandi baru berlaku pada sesi berikutnya</p></div></div>
+          <form class="form-grid" id="pwForm" novalidate>
+            <div class="field span2">
+              <label class="label" for="pwOld">Password Lama <span style="color:var(--bad)">*</span></label>
+              <div class="input-pw">
+                <svg class="ic-l" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+                <input class="input" id="pwOld" type="password" value="RahasiaLama1!" autocomplete="current-password">
+                <button type="button" class="in-btn" data-pw-toggle="pwOld" aria-label="Tampilkan password lama" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="field span2">
+              <label class="label" for="pwNew">Password Baru <span style="color:var(--bad)">*</span></label>
+              <div class="input-pw">
+                <svg class="ic-l" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+                <input class="input" id="pwNew" type="password" placeholder="Masukkan password baru" autocomplete="new-password" aria-describedby="pwHint">
+                <button type="button" class="in-btn" data-pw-toggle="pwNew" aria-label="Tampilkan password baru" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <p class="hint" id="pwHint">Minimal 8 karakter, mengandung huruf besar, angka, dan simbol.</p>
+            </div>
+            <div class="field span2">
+              <label class="label" for="pwRe">Konfirmasi Password Baru <span style="color:var(--bad)">*</span></label>
+              <div class="input-pw">
+                <svg class="ic-l" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+                <input class="input" id="pwRe" type="password" placeholder="Ulangi password baru" autocomplete="new-password">
+                <button type="button" class="in-btn" data-pw-toggle="pwRe" aria-label="Tampilkan konfirmasi password" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <p class="err" id="pwErr" hidden></p>
+            </div>
+          </form>
+          <div class="card-foot">
+            <button class="btn btn-primary" id="savePw">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 4h11l3 3v13H5V4Z"/><path d="M9 4v5h6M8.5 14.5h7"/></svg>
+              Simpan Perubahan
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: NOTIFICATION -->
+      <div id="ptab-notification" hidden>
+        <div id="npListWrap">
+          <div class="np-bar" id="npFilters">
+            <button class="chip" data-nfilter="all" aria-pressed="true">Semua (10)</button>
+            <button class="chip" data-nfilter="unread" aria-pressed="false">Belum Dibaca (5)</button>
+            <button class="chip" data-nfilter="read" aria-pressed="false">Sudah Dibaca (5)</button>
+            <button class="link" id="npReadAll">Tandai semua dibaca</button>
+          </div>
+          <div class="card">
+            <div class="np-list" id="npList"></div>
+            <div class="np-foot" id="npFoot"></div>
+          </div>
+        </div>
+
+        <div class="card" id="npDetail" hidden>
+          <div class="nd-head">
+            <span class="nd-ico" id="ndIco"></span>
+            <div style="min-width:0">
+              <h3 id="ndTitle">Detail notifikasi</h3>
+              <p id="ndMeta">—</p>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="ndBack" style="margin-left:auto;flex:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Kembali ke daftar
+            </button>
+          </div>
+          <div class="nd-body">
+            <p id="ndBody"></p>
+            <div class="dgrid" id="ndFacts" style="margin-top:16px"></div>
+          </div>
+          <div class="card-foot">
+            <button class="btn btn-ghost btn-sm" id="ndDismiss">Tandai sudah dibaca</button>
+            <button class="btn btn-primary btn-sm" id="ndOpen">Buka dokumen terkait</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- BATCH ---------- -->
+    <section class="view page" id="view-batch" hidden>
+      <div class="page-head">
+        <div>
+          <h1>Unggah massal</h1>
+          <p>Proses banyak dokumen sekaligus. Jenis dokumen dikenali otomatis; yang gagal dikenali masuk antrean tinjau.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" id="batchAdd">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>
+            Tambah berkas
+          </button>
+          <button class="btn btn-primary" id="batchRun">Mulai proses 6 berkas</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="filters">
+          <span class="eyebrow" id="batchLabel">Antrean · batch #B-260917-11</span>
+          <span class="pill pill-mute" id="batchStatus">Siap diproses</span>
+          <button class="chip" id="batchExpandAll" aria-pressed="false">Buka semua detail</button>
+          <div class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input class="input" id="batchSearch" placeholder="Cari nama berkas" aria-label="Cari nama berkas dalam antrean">
+          </div>
+        </div>
+        <div id="batchList"></div>
+        <div class="stat-strip">
+          <div><span class="eyebrow">Total berkas</span><b id="bTotal">6</b></div>
+          <div><span class="eyebrow">Selesai</span><b id="bDone">0</b></div>
+          <div><span class="eyebrow">Perlu tinjau</span><b id="bReview">0</b></div>
+          <div><span class="eyebrow">Perkiraan waktu</span><b id="bEta">11s</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- HISTORY ---------- -->
+    <section class="view page" id="view-history" hidden>
+      <div class="page-head">
+        <div>
+          <h1>Riwayat validasi</h1>
+          <p>Semua dokumen yang pernah diproses beserta hasil dan skor risikonya. Data disimpan 90 hari sesuai kebijakan retensi.</p>
+        </div>
+        <button class="btn btn-ghost" data-noop>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 4v12m0 0-4-4m4 4 4-4"/><path d="M4 20h16"/></svg>
+          Ekspor CSV
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="filters" id="histFilters">
+          <button class="chip" aria-pressed="true" data-filter="all">Semua</button>
+          <button class="chip" aria-pressed="false" data-filter="valid">Tervalidasi</button>
+          <button class="chip" aria-pressed="false" data-filter="review">Perlu tinjau</button>
+          <button class="chip" aria-pressed="false" data-filter="rejected">Ditahan</button>
+          <div class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input class="input" id="histSearch" placeholder="Cari nama, nomor, atau ID sesi" aria-label="Cari riwayat validasi">
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Dokumen</th><th>Mode</th><th>Subjek</th><th>Keyakinan</th><th>Risiko</th><th>Status</th><th>Waktu</th></tr>
+            </thead>
+            <tbody id="histBody"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="histEmpty" hidden>Tidak ada riwayat yang cocok dengan filter ini.</div>
+        <div class="np-foot" id="histFoot"></div>
+      </div>
+    </section>
+
+    <!-- ---------- ATURAN VALIDASI ---------- -->
+    <section class="view page" id="view-rules" hidden>
+      <div class="page-head">
+        <div>
+          <h1>Aturan validasi</h1>
+          <p>Atur ambang keputusan dan aturan bisnis yang menentukan dokumen lolos otomatis, masuk antrean tinjau, atau ditahan.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" id="ruleExport">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 4v12m0 0-4-4m4 4 4-4"/><path d="M4 20h16"/></svg>
+            Ekspor JSON
+          </button>
+          <button class="btn btn-primary" id="ruleNew">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>
+            Buat aturan
+          </button>
+        </div>
+      </div>
+
+      <div class="grid g-4 set-kpis">
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Aturan aktif</span><span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span></div>
+          <div class="kpi-val" id="rkActive">0</div>
+          <div class="kpi-foot" id="rkActiveFoot">dari 0 aturan</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Dipicu · 7 hari</span><span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3 4 14h7l-1 7 9-11h-7l1-7Z"/></svg></span></div>
+          <div class="kpi-val" id="rkHits">0</div>
+          <div class="kpi-foot"><span class="trend trend-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg>8,1%</span> dibanding minggu lalu</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Masuk tinjau manual</span><span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg></span></div>
+          <div class="kpi-val">4,2<small>%</small></div>
+          <div class="kpi-foot"><span class="trend trend-up" style="color:var(--ok)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>0,6 pt</span> target di bawah 5%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Latensi evaluasi</span><span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13V8.5M5 13a7 7 0 1 1 14 0"/><path d="M3 17h18"/></svg></span></div>
+          <div class="kpi-val">38<small> ms</small></div>
+          <div class="kpi-foot">p95 per dokumen</div>
+        </div>
+      </div>
+
+      <div class="rl-top">
+        <div class="card" id="thrCard">
+          <div class="card-head">
+            <div><h3 class="card-title">Ambang keputusan global</h3><p class="card-sub">Berlaku untuk semua mode dokumen, kecuali ditimpa aturan khusus di bawah.</p></div>
+            <span class="pill pill-warn dirty-dot" id="thrDirty" hidden>Belum disimpan</span>
+          </div>
+          <div class="rl-thr">
+            <div class="rl-band" aria-hidden="true">
+              <div class="rl-band-track">
+                <i class="z-ok" id="zOk"><span>Lolos otomatis</span></i>
+                <i class="z-warn" id="zWarn"><span>Tinjau manual</span></i>
+                <i class="z-bad" id="zBad"><span>Tahan</span></i>
+              </div>
+              <div class="rl-band-scale"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
+            </div>
+            <div class="rl-sliders">
+              <label class="rl-sl">
+                <span><b>Tinjau bila risiko ≥</b><small>Dokumen masuk antrean analis</small></span>
+                <output id="oReview">40</output>
+                <input type="range" class="range" id="rReview" min="10" max="85" value="40" style="--c:var(--warn)" aria-label="Ambang skor risiko untuk tinjau manual">
+              </label>
+              <label class="rl-sl">
+                <span><b>Tahan bila risiko ≥</b><small>Tidak diteruskan ke core system</small></span>
+                <output id="oHold">75</output>
+                <input type="range" class="range" id="rHold" min="20" max="95" value="75" style="--c:var(--bad)" aria-label="Ambang skor risiko untuk tahan otomatis">
+              </label>
+              <label class="rl-sl">
+                <span><b>Min. keyakinan OCR</b><small>Field di bawahnya ditandai untuk dicek</small></span>
+                <output id="oOcr">90%</output>
+                <input type="range" class="range" id="rOcr" min="70" max="99" value="90" aria-label="Keyakinan OCR minimum">
+              </label>
+              <label class="rl-sl">
+                <span><b>Min. kecocokan wajah</b><small>Selfie dibanding foto dokumen</small></span>
+                <output id="oFace">82%</output>
+                <input type="range" class="range" id="rFace" min="60" max="99" value="82" style="--c:var(--ai)" aria-label="Kecocokan wajah minimum">
+              </label>
+            </div>
+          </div>
+          <div class="card-foot" style="align-items:center">
+            <span class="hint" id="thrMeta" style="margin-right:auto">Terakhir diubah oleh M. Alfian · 12 Sep 2026, 14:08</span>
+            <button class="btn btn-ghost btn-sm" id="thrReset" disabled>Kembalikan</button>
+            <button class="btn btn-primary btn-sm" id="thrSave" disabled>Simpan ambang</button>
+          </div>
+        </div>
+
+        <div class="card" id="simCard">
+          <div class="card-head">
+            <div><h3 class="card-title">Simulasi dampak</h3><p class="card-sub">Uji ambang &amp; aturan aktif terhadap data historis sebelum disimpan.</p></div>
+            <span class="ai-badge" aria-hidden="true" style="width:28px;height:28px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"/></svg>
+            </span>
+          </div>
+          <div class="rl-sim">
+            <select class="select" id="simSet" aria-label="Sumber data simulasi">
+              <option value="1248">7 hari terakhir · 1.248 dokumen</option>
+              <option value="5310">30 hari terakhir · 5.310 dokumen</option>
+              <option value="38">Batch #B-260917-10 · 38 dokumen</option>
+            </select>
+            <div class="rl-sim-idle" id="simIdle">
+              <span class="drop-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M7 16V10M12 16V5M17 16v-4"/></svg></span>
+              <b style="color:var(--ink);font-size:13px">Belum ada simulasi</b>
+              <span>Geser ambang di sebelah kiri, lalu jalankan simulasi untuk membandingkan hasilnya dengan konfigurasi tersimpan.</span>
+            </div>
+            <div class="rl-sim-run" id="simRun" hidden>
+              <p><span>Mengevaluasi dokumen…</span><b id="simCount">0 / 0</b></p>
+              <div class="b-prog"><i id="simBar"></i></div>
+              <p style="font-size:11.5px"><span id="simStage">Memuat hasil OCR historis</span><span class="wait-dots"><i></i><i></i><i></i></span></p>
+            </div>
+            <div class="rl-sim-res" id="simRes" hidden></div>
+          </div>
+          <div class="card-foot">
+            <button class="btn btn-ai btn-sm" id="simGo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M7 5v14l11-7L7 5Z"/></svg>
+              Jalankan simulasi
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="filters" id="ruleFilters">
+          <button class="chip" aria-pressed="true" data-rcat="all">Semua</button>
+          <button class="chip" aria-pressed="false" data-rcat="id">Identitas</button>
+          <button class="chip" aria-pressed="false" data-rcat="veh">Kendaraan</button>
+          <button class="chip" aria-pressed="false" data-rcat="fin">Keuangan</button>
+          <button class="chip" aria-pressed="false" data-rcat="prop">Properti &amp; aset</button>
+          <button class="chip" aria-pressed="false" data-rcat="custom">Kustom</button>
+          <div class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input class="input" id="ruleSearch" placeholder="Cari nama atau ID aturan" aria-label="Cari aturan">
+          </div>
+        </div>
+        <div id="ruleList"></div>
+        <div class="empty" id="ruleEmpty" hidden>Tidak ada aturan yang cocok dengan filter ini.</div>
+        <div class="np-foot" id="rulePager"></div>
+      </div>
+    </section>
+
+    <!-- ---------- INTEGRASI & API ---------- -->
+    <section class="view page" id="view-api" hidden>
+      <div class="page-head">
+        <div>
+          <h1>Integrasi &amp; API</h1>
+          <p>Hubungkan Verifika ke sistem internal lewat REST API, webhook, dan konektor siap pakai.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <div class="segmented" id="envTabs" role="group" aria-label="Lingkungan">
+            <button class="seg" data-env="live" aria-pressed="true">Produksi</button>
+            <button class="seg" data-env="test" aria-pressed="false">Sandbox</button>
+          </div>
+          <button class="btn btn-primary" id="keyNew">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>
+            Buat API key
+          </button>
+        </div>
+      </div>
+
+      <div class="grid g-4 set-kpis" id="apKpis">
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Permintaan · 24 jam</span><span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 16-4-4 4-4M16 8l4 4-4 4M13.5 5l-3 14"/></svg></span></div>
+          <div class="kpi-val" id="akReq">18.420</div>
+          <div class="kpi-foot" id="akReqF"><span class="trend trend-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg>6,2%</span> dibanding kemarin</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Tingkat sukses</span><span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.2 2.2 4.3-4.6"/></svg></span></div>
+          <div class="kpi-val" id="akOk">99,62<small>%</small></div>
+          <div class="kpi-foot" id="akOkF">70 error 5xx · 24 jam</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Latensi p95</span><span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13V8.5M5 13a7 7 0 1 1 14 0"/><path d="M3 17h18"/></svg></span></div>
+          <div class="kpi-val" id="akLat">412<small> ms</small></div>
+          <div class="kpi-foot" id="akLatF">SLA 800 ms · aman</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="eyebrow">Webhook terkirim</span><span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16.5a3 3 0 1 0-2.6-4.5H9"/><path d="M6 16.5a3 3 0 1 0 2.9 3.7"/><path d="M12 5.5a3 3 0 1 0-2.6 4.5l3.1 6"/></svg></span></div>
+          <div class="kpi-val" id="akWh">2.184</div>
+          <div class="kpi-foot" id="akWhF">3 gagal · dicoba ulang otomatis</div>
+        </div>
+      </div>
+
+      <div class="set-tabs">
+        <div class="segmented" id="apTabs" role="tablist" aria-label="Bagian integrasi">
+          <button class="seg" role="tab" data-atab="keys" aria-pressed="true">API Keys</button>
+          <button class="seg" role="tab" data-atab="hooks" aria-pressed="false">Webhook</button>
+          <button class="seg" role="tab" data-atab="conn" aria-pressed="false">Konektor</button>
+          <button class="seg" role="tab" data-atab="logs" aria-pressed="false">Log permintaan</button>
+        </div>
+      </div>
+
+      <!-- TAB: API KEYS -->
+      <div class="tabpane ap-stack" id="atab-keys">
+        <div class="card">
+          <div class="card-head">
+            <div><h3 class="card-title">API key</h3><p class="card-sub" id="keySub">Kunci untuk lingkungan produksi. Jangan simpan di kode sisi klien.</p></div>
+          </div>
+          <div class="table-scroll">
+            <table class="ap-table">
+              <thead><tr><th>Nama</th><th>Kunci</th><th>Cakupan</th><th>Terakhir dipakai</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead>
+              <tbody id="keyBody"></tbody>
+            </table>
+          </div>
+          <div class="np-foot" id="keyPager"></div>
+          <div class="sig-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.4 8.3-8 9-4.6-.7-8-4-8-9V7l8-4Z"/></svg>
+            <span>Kirim kunci pada header <code>Authorization: Bearer &lt;key&gt;</code>. Kunci yang diputar tetap berlaku 24 jam agar sistem Anda sempat beralih.</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h3 class="card-title">Coba API</h3><p class="card-sub">Kirim permintaan uji memakai kunci sandbox.</p></div>
+            <span class="pill pill-brand" id="pgEnv">v1 · REST</span>
+          </div>
+          <div class="pg-body pg-split">
+           <div class="pg-col">
+            <select class="select" id="pgEp" aria-label="Pilih endpoint">
+              <option value="extract">POST /v1/documents/extract</option>
+              <option value="get">GET /v1/validations/{id}</option>
+              <option value="decide">POST /v1/validations/{id}/decision</option>
+            </select>
+            <div class="pg-langs" id="pgLangs">
+              <button class="chip" data-lang="curl" aria-pressed="true">cURL</button>
+              <button class="chip" data-lang="node" aria-pressed="false">Node.js</button>
+              <button class="chip" data-lang="py" aria-pressed="false">Python</button>
+              <button class="btn btn-primary btn-sm" id="pgSend" style="margin-left:auto">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/></svg>
+                Kirim
+              </button>
+            </div>
+            <div class="code-wrap">
+              <pre class="ap-code" id="pgCode"></pre>
+              <button class="ic-sm" id="pgCopy" aria-label="Salin contoh kode"></button>
+            </div>
+           </div>
+           <div class="pg-col">
+            <div class="pg-resp">
+              <div class="pg-resp-head"><span>Respons</span><span id="pgStatus" style="margin-left:auto" class="mono">— belum dikirim</span></div>
+              <div class="pg-line" id="pgLine" hidden></div>
+              <pre class="ap-code" id="pgOut"><span class="cc">// Tekan "Kirim" untuk melihat respons dari sandbox</span></pre>
+            </div>
+           </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: WEBHOOK -->
+      <div class="tabpane ap-grid" id="atab-hooks" hidden>
+        <div class="card">
+          <div class="card-head">
+            <div><h3 class="card-title">Endpoint webhook</h3><p class="card-sub">Verifika mengirim event ke URL ini saat status dokumen berubah.</p></div>
+            <button class="btn btn-ghost btn-sm" id="hookNew">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+              Tambah endpoint
+            </button>
+          </div>
+          <div id="hookList"></div>
+          <div class="sig-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+            <span>Setiap payload ditandatangani HMAC-SHA256 pada header <code>X-Verifika-Signature</code>. Pengiriman gagal dicoba ulang hingga 5 kali dengan jeda bertahap.</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div><h3 class="card-title">Pengiriman terbaru</h3><p class="card-sub">Klik baris untuk melihat payload.</p></div>
+            <span class="pill pill-mute" id="dlCount">0</span>
+          </div>
+          <div id="dlList"></div>
+        </div>
+      </div>
+
+      <!-- TAB: KONEKTOR -->
+      <div class="tabpane" id="atab-conn" hidden>
+        <div class="np-bar" id="cxFilters">
+          <button class="chip" data-cx="all" aria-pressed="true">Semua</button>
+          <button class="chip" data-cx="on" aria-pressed="false">Terhubung</button>
+          <button class="chip" data-cx="off" aria-pressed="false">Belum terhubung</button>
+        </div>
+        <div class="cx-grid" id="cxGrid"></div>
+      </div>
+
+      <!-- TAB: LOG -->
+      <div class="tabpane" id="atab-logs" hidden>
+        <div class="card">
+          <div class="filters" id="logFilters">
+            <button class="chip" aria-pressed="true" data-lcode="all">Semua</button>
+            <button class="chip" aria-pressed="false" data-lcode="2">2xx</button>
+            <button class="chip" aria-pressed="false" data-lcode="4">4xx</button>
+            <button class="chip" aria-pressed="false" data-lcode="5">5xx</button>
+            <span class="lg-live" id="liveLbl" style="margin-left:6px"><i class="live-dot"></i><span>Streaming langsung</span></span>
+            <button class="switch sw-ok" role="switch" id="liveSw" aria-checked="false" aria-label="Streaming log langsung"></button>
+            <div class="search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input class="input" id="logSearch" placeholder="Cari endpoint atau request ID" aria-label="Cari log permintaan">
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="lg-table">
+              <thead><tr><th>Waktu</th><th>Metode</th><th>Endpoint</th><th>Status</th><th>Latensi</th><th>Kunci</th><th>Request ID</th></tr></thead>
+              <tbody id="logBody"></tbody>
+            </table>
+          </div>
+          <div class="empty" id="logEmpty" hidden>Tidak ada permintaan yang cocok.</div>
+          <div class="np-foot" id="logFoot"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ======================= ADD FILES SHEET ======================= -->
+<div class="sheet" id="addSheet" hidden role="dialog" aria-modal="true" aria-labelledby="addSheetTitle">
+  <div class="sheet-box">
+    <div class="sheet-head">
+      <div>
+        <h3 id="addSheetTitle">Tambah berkas ke antrean</h3>
+        <p>Pilih beberapa dokumen sekaligus. Jenis dokumen dikenali otomatis setelah diunggah.</p>
+      </div>
+      <button class="sheet-close" id="addSheetClose" aria-label="Tutup jendela tambah berkas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body" style="display:flex;flex-direction:column;gap:14px">
+      <div class="drop-sm" id="sheetDrop" tabindex="0" role="button" aria-label="Buka pemilih berkas">
+        <span class="drop-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V8m0 0-3 3m3-3 3 3"/><path d="M20 16.5A3.5 3.5 0 0 0 18 10h-.7A6 6 0 1 0 6 14.5"/></svg></span>
+        <h4>Tarik berkas ke sini atau klik untuk memilih</h4>
+        <p>JPG, PNG atau PDF · maksimal 10 MB per berkas · hingga 200 berkas per batch</p>
+      </div>
+      <div id="pickWrap" hidden>
+        <div class="row-between" style="margin-bottom:9px">
+          <span class="eyebrow">Berkas terpilih dari perangkat</span>
+          <button class="chip" id="pickAll" aria-pressed="true">Pilih semua</button>
+        </div>
+        <div class="pick-list" id="pickList"></div>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <span class="hint" id="pickCount">Belum ada berkas dipilih</span>
+      <button class="btn btn-ghost btn-sm" id="addSheetCancel" style="margin-left:auto">Batal</button>
+      <button class="btn btn-primary btn-sm" id="addSheetConfirm" disabled>Tambahkan ke antrean</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ======================= RULE EDITOR SHEET ======================= -->
+<div class="sheet" id="ruleSheet" hidden role="dialog" aria-modal="true" aria-labelledby="ruleSheetTitle">
+  <div class="sheet-box wide">
+    <div class="sheet-head">
+      <div>
+        <h3 id="ruleSheetTitle">Buat aturan validasi</h3>
+        <p id="ruleSheetSub">Aturan dijalankan setelah OCR dan analisis AI selesai.</p>
+      </div>
+      <button class="sheet-close" data-close-sheet aria-label="Tutup editor aturan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body rl-form">
+      <div class="row2">
+        <div class="field">
+          <label class="label" for="reName">Nama aturan <span style="color:var(--bad)">*</span></label>
+          <input class="input in-sm" id="reName" placeholder="Mis. Rasio cicilan terlalu tinggi" maxlength="70">
+        </div>
+        <div class="field">
+          <label class="label" for="reCat">Kategori</label>
+          <select class="select" id="reCat">
+            <option value="id">Identitas</option>
+            <option value="veh">Kendaraan</option>
+            <option value="fin">Keuangan</option>
+            <option value="prop">Properti &amp; aset</option>
+            <option value="custom">Kustom</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Berlaku untuk mode dokumen <span style="color:var(--bad)">*</span></span>
+        <div class="mode-chips" id="reModes"></div>
+      </div>
+      <div class="field">
+        <span class="label">Kondisi</span>
+        <div class="cond-box">
+          <div class="cond-head">
+            <span>Jika</span>
+            <div class="segmented seg-sm" id="reJoin" role="group" aria-label="Penggabung kondisi">
+              <button type="button" class="seg" data-join="DAN" aria-pressed="true">semua</button>
+              <button type="button" class="seg" data-join="ATAU" aria-pressed="false">salah satu</button>
+            </div>
+            <span>kondisi berikut terpenuhi:</span>
+          </div>
+          <div id="reConds" style="display:flex;flex-direction:column;gap:7px"></div>
+          <button type="button" class="add-cond" id="reAddCond">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Tambah kondisi
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Maka</span>
+        <div class="act-pick" id="reAct">
+          <button type="button" class="act-opt" data-act="lolos" aria-pressed="false"><b><i style="background:var(--ok)"></i>Loloskan</b><small>Lewati tinjauan</small></button>
+          <button type="button" class="act-opt" data-act="tandai" aria-pressed="false"><b><i style="background:var(--brand)"></i>Tandai saja</b><small>Catat, tetap diproses</small></button>
+          <button type="button" class="act-opt" data-act="tinjau" aria-pressed="true"><b><i style="background:var(--warn)"></i>Tinjau manual</b><small>Masuk antrean analis</small></button>
+          <button type="button" class="act-opt" data-act="tahan" aria-pressed="false"><b><i style="background:var(--bad)"></i>Tahan</b><small>Blokir &amp; beri peringatan</small></button>
+        </div>
+      </div>
+      <div class="inline-row">
+        <span><b>Kirim notifikasi ke analis</b><small>Muncul di lonceng notifikasi dan email</small></span>
+        <button type="button" class="switch sw-brand" role="switch" id="reNotify" aria-checked="true" aria-label="Kirim notifikasi ke analis"></button>
+      </div>
+      <div class="field">
+        <span class="label">Pratinjau ekspresi</span>
+        <div class="expr-prev" id="rePrev"></div>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <p class="err" id="reErr" hidden></p>
+      <button class="btn btn-ghost btn-sm" data-close-sheet style="margin-left:auto">Batal</button>
+      <button class="btn btn-primary btn-sm" id="reSave">Simpan aturan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= API KEY SHEET ======================= -->
+<div class="sheet" id="keySheet" hidden role="dialog" aria-modal="true" aria-labelledby="keySheetTitle">
+  <div class="sheet-box">
+    <div class="sheet-head">
+      <div>
+        <h3 id="keySheetTitle">Buat API key</h3>
+        <p id="keySheetSub">Beri cakupan seminimal mungkin sesuai kebutuhan sistem Anda.</p>
+      </div>
+      <button class="sheet-close" data-close-sheet aria-label="Tutup jendela API key">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body rl-form" id="keyForm">
+      <div class="row2">
+        <div class="field">
+          <label class="label" for="kName">Nama kunci <span style="color:var(--bad)">*</span></label>
+          <input class="input in-sm" id="kName" placeholder="Mis. LOS Cabang Surabaya" maxlength="40">
+        </div>
+        <div class="field">
+          <label class="label" for="kExp">Kedaluwarsa</label>
+          <select class="select" id="kExp">
+            <option value="90">90 hari</option>
+            <option value="30">30 hari</option>
+            <option value="365">1 tahun</option>
+            <option value="0">Tidak pernah</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Cakupan akses <span style="color:var(--bad)">*</span></span>
+        <div class="pick-list" id="kScopes">
+          <label class="pick"><input type="checkbox" value="ocr:write" checked><span style="min-width:0;flex:1"><b class="mono" style="font-size:12px">ocr:write</b><small style="font-family:var(--sans)">Unggah dokumen &amp; jalankan ekstraksi</small></span></label>
+          <label class="pick"><input type="checkbox" value="validate:read" checked><span style="min-width:0;flex:1"><b class="mono" style="font-size:12px">validate:read</b><small style="font-family:var(--sans)">Baca hasil validasi &amp; skor risiko</small></span></label>
+          <label class="pick"><input type="checkbox" value="validate:write"><span style="min-width:0;flex:1"><b class="mono" style="font-size:12px">validate:write</b><small style="font-family:var(--sans)">Kirim keputusan hasil tinjauan</small></span></label>
+          <label class="pick"><input type="checkbox" value="webhook:manage"><span style="min-width:0;flex:1"><b class="mono" style="font-size:12px">webhook:manage</b><small style="font-family:var(--sans)">Kelola endpoint webhook</small></span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="kIp">IP allowlist <span style="color:var(--muted-2);font-weight:500">(opsional)</span></label>
+        <input class="input in-sm mono" id="kIp" placeholder="10.20.0.0/16, 203.0.113.8">
+        <p class="hint">Kosongkan untuk mengizinkan semua IP. Pisahkan dengan koma.</p>
+      </div>
+    </div>
+    <div class="sheet-body" id="keyDone" hidden style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px">
+      <span class="verdict-ico" style="width:52px;height:52px;animation:popIn .5s ease"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px"><path d="M20 6 9 17l-5-5"/></svg></span>
+      <div><h3 style="font-size:16px">Kunci berhasil dibuat</h3><p class="hint" style="margin-top:4px">Salin sekarang — demi keamanan, kunci lengkap tidak akan ditampilkan lagi.</p></div>
+      <div class="secret-box" style="width:100%">
+        <code id="kNewVal">—</code>
+        <button class="btn btn-ghost btn-sm" id="kCopyNew">Salin</button>
+      </div>
+      <div class="alert alert-info" style="text-align:left;width:100%">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        <span>Simpan di secret manager (Vault, AWS Secrets Manager, dsb.), bukan di repositori kode.</span>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <p class="err" id="kErr" hidden></p>
+      <button class="btn btn-ghost btn-sm" data-close-sheet style="margin-left:auto" id="kCancel">Batal</button>
+      <button class="btn btn-primary btn-sm" id="kSave">Buat kunci</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= WEBHOOK SHEET ======================= -->
+<div class="sheet" id="hookSheet" hidden role="dialog" aria-modal="true" aria-labelledby="hookSheetTitle">
+  <div class="sheet-box">
+    <div class="sheet-head">
+      <div>
+        <h3 id="hookSheetTitle">Tambah endpoint webhook</h3>
+        <p>Endpoint harus HTTPS dan membalas 2xx dalam 10 detik.</p>
+      </div>
+      <button class="sheet-close" data-close-sheet aria-label="Tutup jendela webhook">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body rl-form">
+      <div class="field">
+        <label class="label" for="hUrl">URL endpoint <span style="color:var(--bad)">*</span></label>
+        <input class="input in-sm mono" id="hUrl" placeholder="https://api.perusahaan.co.id/webhooks/verifika">
+      </div>
+      <div class="field">
+        <span class="label">Event yang dikirim <span style="color:var(--bad)">*</span></span>
+        <div class="ev-list" id="hEvents"></div>
+      </div>
+      <div class="field">
+        <span class="label">Signing secret</span>
+        <div class="secret-box">
+          <code id="hSecret">whsec_••••</code>
+          <button type="button" class="ic-sm" id="hRegen" aria-label="Buat ulang secret" style="border-color:var(--line)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.9-3M4 5v3h3M4 13a8 8 0 0 0 14.9 3M20 19v-3h-3"/></svg></button>
+          <button type="button" class="ic-sm" id="hCopySecret" aria-label="Salin secret" style="border-color:var(--line)"></button>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <p class="err" id="hErr" hidden></p>
+      <button class="btn btn-ghost btn-sm" data-close-sheet style="margin-left:auto">Batal</button>
+      <button class="btn btn-primary btn-sm" id="hSave">Simpan endpoint</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= CONFIRM SHEET ======================= -->
+<div class="sheet" id="confirmSheet" hidden role="alertdialog" aria-modal="true" aria-labelledby="cfTitle">
+  <div class="sheet-box" style="max-width:420px">
+    <div class="sheet-body" style="display:flex;gap:14px;align-items:flex-start;padding:20px">
+      <span class="nd-ico" style="background:var(--bad-soft);color:var(--bad);border-color:var(--bad-line)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 17.5A2 2 0 0 0 4.1 20.5h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span>
+      <div>
+        <h3 id="cfTitle" style="font-size:15.5px">Yakin?</h3>
+        <p id="cfMsg" style="font-size:13px;color:var(--muted);margin-top:4px;line-height:1.55"></p>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost btn-sm" data-close-sheet style="margin-left:auto">Batal</button>
+      <button class="btn btn-sm" id="cfOk" style="background:var(--bad);color:#fff">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= BOOT LOADER ======================= -->
+<div class="boot" id="boot" hidden>
+  <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><circle cx="8.5" cy="11" r="2.2"/><path d="M5 17c.7-1.7 2-2.5 3.5-2.5S11.3 15.3 12 17M15 9.5h4M15 13h4"/></svg></span>
+  <div class="boot-track"><i id="bootBar"></i></div>
+  <p class="boot-txt" id="bootTxt">Menyiapkan ruang kerja…</p>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>
